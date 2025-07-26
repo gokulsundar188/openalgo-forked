@@ -63,10 +63,33 @@ class WebSocketProxy:
         # ZeroMQ context for subscribing to broker adapters
         self.context = zmq.asyncio.Context()
         self.socket = self.context.socket(zmq.SUB)
-        # Connecting to ZMQ
+        
+        # Connecting to ZMQ with error handling
         ZMQ_HOST = os.getenv('ZMQ_HOST', 'localhost')
-        ZMQ_PORT = os.getenv('ZMQ_PORT')
-        self.socket.connect(f"tcp://{ZMQ_HOST}:{ZMQ_PORT}")  # Connect to broker adapter publisher
+        ZMQ_PORT = os.getenv('ZMQ_PORT', '5555')  # Default to port 5555 if not set
+        
+        try:
+            # Validate port number
+            port_int = int(ZMQ_PORT)
+            if not (1 <= port_int <= 65535):
+                raise ValueError(f"Invalid port number: {ZMQ_PORT}")
+                
+            zmq_address = f"tcp://{ZMQ_HOST}:{ZMQ_PORT}"
+            self.socket.connect(zmq_address)  # Connect to broker adapter publisher
+            logger.info(f"Connected to ZeroMQ at {zmq_address}")
+            
+        except (ValueError, TypeError) as e:
+            logger.error(f"Invalid ZMQ configuration - Host: {ZMQ_HOST}, Port: {ZMQ_PORT}. Error: {e}")
+            # Use default fallback
+            fallback_address = "tcp://localhost:5555"
+            self.socket.connect(fallback_address)
+            logger.warning(f"Using fallback ZMQ address: {fallback_address}")
+        except Exception as e:
+            logger.error(f"Failed to connect to ZMQ at {ZMQ_HOST}:{ZMQ_PORT}. Error: {e}")
+            # Use default fallback
+            fallback_address = "tcp://localhost:5555"
+            self.socket.connect(fallback_address)
+            logger.warning(f"Using fallback ZMQ address: {fallback_address}")
         
         # Set up ZeroMQ subscriber to receive all messages
         self.socket.setsockopt(zmq.SUBSCRIBE, b"")  # Subscribe to all topics
@@ -293,7 +316,7 @@ class WebSocketProxy:
             dict: Broker configuration containing broker_name and credentials
         """
         try:
-            from database.auth_db import get_broker_name
+            from database.auth_db import get_broker_name, db_session
             from sqlalchemy import text
             
             # Get user's connected broker from database
@@ -305,7 +328,7 @@ class WebSocketProxy:
                 LIMIT 1
             """)
             
-            result = db.session.execute(query, {"user_id": user_id}).fetchone()
+            result = db_session.execute(query, {"user_id": user_id}).fetchone()
             
             if result and result.broker:
                 broker_name = result.broker
@@ -452,6 +475,8 @@ class WebSocketProxy:
         except Exception as e:
             logger.error(f"Error getting supported brokers: {e}")
             await self.send_error(client_id, "BROKER_LIST_ERROR", str(e))
+    
+    async def get_broker_info(self, client_id):
         """
         Get broker information for an authenticated client
         
