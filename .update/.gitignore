@@ -1,0 +1,8 @@
+# Backup files and directories
+backups/
+*.backup.*
+.env.backup.*
+
+# Temporary files
+*.tmp
+*.temp

@@ -93,11 +93,12 @@ class TrafficLog(LogBase):
 
 def init_logs_db():
     """Initialize the logs database"""
-    # Extract directory from database URL and create if it doesn't exist
-    db_path = LOGS_DATABASE_URL.replace('sqlite:///', '')
-    db_dir = os.path.dirname(db_path)
-    if db_dir:
-        os.makedirs(db_dir, exist_ok=True)
+    # Extract directory from database URL and create if it doesn't exist (only for SQLite)
+    if LOGS_DATABASE_URL.startswith('sqlite://'):
+        db_path = LOGS_DATABASE_URL.replace('sqlite:///', '')
+        db_dir = os.path.dirname(db_path)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
     
     logger.info(f"Initializing Traffic Logs DB at: {LOGS_DATABASE_URL}")
     LogBase.metadata.create_all(bind=logs_engine)
