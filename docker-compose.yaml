@@ -22,23 +22,3 @@ services:
       - FLASK_DEBUG=${FLASK_DEBUG:-0}
 
     restart: unless-stopped
-
-  mariadb:
-    container_name: mariadb
-    build:
-      context: ./mariadb
-      dockerfile: Dockerfile
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: openalgo
-      MYSQL_USER: dbuser
-      MYSQL_PASSWORD: aa123456
-    ports:
-      - "3307:3306"
-    volumes:
-      - mariadb_volume:/var/lib/mysql
-      - ./mariadb/sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-
-volumes:
-  mariadb_volume:
