@@ -47,11 +47,10 @@ def init_db():
     """Initialize the database and create tables"""
     logger.info("Initializing Master Contract DB")
     
-    # Create database directory if it doesn't exist (only for SQLite)
-    if DATABASE_URL.startswith('sqlite://'):
-        db_path = os.path.dirname(DATABASE_URL.replace('sqlite:///', ''))
-        if db_path and not os.path.exists(db_path):
-            os.makedirs(db_path)
+    # Create database directory if it doesn't exist
+    db_path = os.path.dirname(DATABASE_URL.replace('sqlite:///', ''))
+    if db_path and not os.path.exists(db_path):
+        os.makedirs(db_path)
     
     Base.metadata.create_all(bind=engine)
 

@@ -10,9 +10,8 @@ logger = logging.getLogger(__name__)
 # Get the database path from environment variable or use default
 DB_PATH = os.getenv('DATABASE_URL', 'sqlite:///db/openalgo.db')
 
-# Ensure the directory exists (only for SQLite)
-if DB_PATH.startswith('sqlite://'):
-    os.makedirs(os.path.dirname(DB_PATH.replace('sqlite:///', '')), exist_ok=True)
+# Ensure the directory exists
+os.makedirs(os.path.dirname(DB_PATH.replace('sqlite:///', '')), exist_ok=True)
 
 # Create the engine and session
 engine = create_engine(
