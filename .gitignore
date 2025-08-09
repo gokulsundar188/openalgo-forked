@@ -50,3 +50,6 @@ venv.bak/
 
 # Tailwind CSS output
 # **/output.css
+
+# script to migrate sqlite to mysql
+.update/
