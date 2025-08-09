@@ -89,6 +89,11 @@ def log_environment_info():
     if update_env_file and os.path.exists(update_env_file):
         log_message(f"📋 MySQL URLs loaded from: {os.path.abspath(update_env_file)}")
 
+def log_message(message: str, level: str = "INFO"):
+    """Log messages with timestamp and level."""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] {level}: {message}")
+
 def create_backup(sqlite_url: str, backup_dir: str = "backups") -> str:
     """Create a backup of SQLite database before migration."""
     if not sqlite_url.startswith('sqlite:///'):

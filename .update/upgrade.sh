@@ -230,16 +230,10 @@ update_requirements() {
     
     # Find SQLAlchemy line and add pymysql after it
     if grep -q "sqlalchemy==" "$requirements_file"; then
-        # Find the line number of sqlalchemy
-        local line_num=$(grep -n "sqlalchemy==" "$requirements_file" | head -1 | cut -d: -f1)
-        
-        # Create a temporary file with pymysql inserted after sqlalchemy
-        head -n "$line_num" "$requirements_file" > "$requirements_file.tmp"
-        echo "pymysql==1.1.1" >> "$requirements_file.tmp"
-        tail -n +$((line_num + 1)) "$requirements_file" >> "$requirements_file.tmp"
-        
-        # Replace the original file
-        mv "$requirements_file.tmp" "$requirements_file"
+        # Add pymysql after sqlalchemy line
+        sed -i '' '/sqlalchemy==/a\
+pymysql==1.1.1' "$requirements_file" 2>/dev/null || sed -i '/sqlalchemy==/a\
+pymysql==1.1.1' "$requirements_file"
         log_message "  ✅ Added pymysql==1.1.1 to requirements.txt"
     else
         # If no sqlalchemy found, add at the end
